@@ -16,34 +16,6 @@ import speech_recognition
 config = Config()
 
 
-def run_web():
-    import uvicorn
-    from fastapi import FastAPI
-    from fastapi.staticfiles import StaticFiles
-
-    app = FastAPI()
-
-    def start_web():
-        try:
-            # Mount the router from the api module
-            from Flask.main import router
-
-            app.include_router(router)
-            uvicorn.run(
-                app,
-                host="0.0.0.0",
-                port=5000,
-            )
-        except Exception as e:
-            event_handler.trigger("Error", e)
-
-    # Start the web server
-    t = threading.Thread(target=start_web)
-    t.daemon = True
-    t.start()
-    return t
-
-
 def run_assistant():
     if os.path.exists("./UPDATE"):
         return
@@ -51,12 +23,15 @@ def run_assistant():
 
     from Hal import initialize_assistant
 
-    assistant_instance = initialize_assistant()
+    assistant = initialize_assistant()
+    
+    print("hio")
+    print(assistant.action_dict)
+        
+    event_handler.trigger("Ready")
 
+    
     time.sleep(2)
-
-    assistant_instance.voice_to_voice_chat()
-
 
 def start_setup():
     import setup
@@ -93,33 +68,24 @@ def main():
             run_api()
 
         while config["CURRENT_STAGE"] == 1:
-            web_thread = run_web()
-
             start_setup()
 
             break
 
         while config["CURRENT_STAGE"] == 2:
-            web_thread = run_web()
-
             run_assistant()
             break
     except Exception as e:
-        from Hal import initialize_assistant
-
-        assistant = initialize_assistant()
 
         event_handler.trigger("Error", e)
 
 
 def setup_and_teardown():
-    import sys
-
-    if platform.system() == "Linux":
-        sys.stdout = open("/etc/ballbert/logs.txt", "w")
-    main()
-    sys.stdout.close()
+    try:
+        main()
+    except KeyboardInterrupt as e:
+        print("KEYBOARD")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     setup_and_teardown()

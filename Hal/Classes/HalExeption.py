@@ -8,7 +8,3 @@ class NoTTSException(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
-
-class NoVoiceException(Exception):
-    def __init__(self, *args: object) -> None:
-        super().__init__(*args)

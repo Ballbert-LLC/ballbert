@@ -1,6 +1,7 @@
 import inspect
 import json
 import threading
+import time
 import websocket
 from Event_Handler import event_handler
 
@@ -19,6 +20,7 @@ class Websocket_Client:
         self.thread = None
         self.uid = uid
         self.routes = dict()
+        self.send_queue = []
 
         self.connect()
 
@@ -29,18 +31,18 @@ class Websocket_Client:
 
     def on_message(self, ws, message):
         try:
-            print("message", message)
             decoded_json_message = json.loads(message)
         except Exception as e:
+            print(e)
             event_handler.trigger("Error", WebsocketException("Invalid Json"))
             return
 
+        
+
         action = decoded_json_message.get("type")
+
         if not (action in self.routes and callable(self.routes.get(action))):
-            print(
-                "invalid data", action, self.routes, callable(self.routes.get(action))
-            )
-            event_handler.trigger("Error", WebsocketException("Invalid Json"))
+            # event_handler.trigger("Error", WebsocketException("Invalid Json"))
             return
 
         route = self.routes.get(action)
@@ -66,15 +68,29 @@ class Websocket_Client:
             elif callable(route):
                 route(**arguments_to_provide)
         except Exception as e:
+            raise e
             event_handler.trigger("Error", WebsocketException(e))
 
     def on_error(self, ws, error):
-        event_handler.trigger("Error", error)
+        print(error)
+        print("websocket had error reconnecting in 3 seconds")
+        try:
+            self.ws.close()
+        finally:
+            self.ws = None
+        time.sleep(3)
+        self.connect()
+        return 
 
     def on_close(self, ws, close_status_code, close_msg):
         event_handler.trigger("WS Closed", close_status_code, close_msg)
 
     def on_open(self, ws):
+        print("websocket init")
+        queue = list(self.send_queue)
+        for message in queue:
+            self.send_request(message)
+            self.send_queue.remove(message)
         event_handler.trigger("WS Opened")
 
     def connect(self):
@@ -92,10 +108,14 @@ class Websocket_Client:
         self.thread.start()
 
     def send_request(self, request):
-        if self.ws:
-            self.ws.send(request)
-        else:
-            print("WebSocket is not connected")
+        try:
+            if self.ws:
+                self.ws.send(request)
+            else:
+                print("WebSocket is not connected")
+        except websocket._exceptions.WebSocketConnectionClosedException as e:
+            print("websocket cloased ")
+            self.send_queue.append(request)
 
     def send_message(self, type, data=None, **kwargs):
         json_data = {"type": type}
@@ -105,5 +125,10 @@ class Websocket_Client:
             json_data = {**json_data, **kwargs}
 
         string_formated_message = json.dumps(json_data)
-        print(string_formated_message)
         self.send_request(string_formated_message)
+
+
+
+
+
+

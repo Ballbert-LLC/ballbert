@@ -14,6 +14,7 @@ from Hal.Decorators import reg
 
 import os
 from Config import Config
+from Hal.Websocket_Client import Websocket_Client
 
 config = Config()
 
@@ -76,39 +77,65 @@ def deepcopy(original_dict):
 
 
 class SkillMangager:
-    def __init__(self, openai) -> None:
+    def __init__(self, openai, websocket_client: Websocket_Client) -> None:
         self.openai = openai
-
+        self.websocket_client = websocket_client
+    
     def get_actions_dict(self):
         """
         returns a formated actions dict from the reg.all
         """ 
+
+            
         action_dict: dict = reg.all
         for skill_id, item in action_dict.items():
-            _parameters = action_dict[skill_id]["docstring"].params
-
             action_dict[skill_id]["parameters"] = (
                 action_dict[skill_id]["parameters"]
                 if "parameters" in action_dict[skill_id]
                 else {}
             )
+            
+            docstring = action_dict[skill_id]["docstring"]
 
-            for param in _parameters:
-                _name = param.arg_name
-                _type = param.type_name
+            docstring_params = {p.arg_name: p for p in docstring.params}
 
-                _description = param.description
-                _required = not param.is_optional
+            sig = inspect.signature(action_dict[skill_id]["function"])
 
-                action_dict[skill_id]["parameters"][_name] = {
-                    "type": _type,
-                    "description": _description,
-                    "required": _required,
+            for param in list(sig.parameters.values())[1:]:
+                
+                
+                
+                if param.name not in docstring_params:
+                    raise Exception(f"Missing Argument {param.name} in docstring")
+                else:
+                    type = docstring_params[param.name].type_name
+                    
+                    json_types = {"string", "number", "integer", "object", "array", "boolean", "null"}
+                    python_types={"int": "integer", "float": "number", "dict": "object", "list": "array", "bool": "boolean", "None": "null"}
+                    
+                    if type == None:
+                        type = "None"
+                    
+                    if type in python_types: 
+                        type = python_types[type]
+                    
+                    if type not in json_types:
+                        raise Exception(f"Invalid data type of argument {param.name}: {type}")
+                    
+                    description = docstring_params[param.name].description
+                    required = param.default == param.empty
+                
+                if not(param.kind == param.POSITIONAL_OR_KEYWORD or param.kind == param.KEYWORD_ONLY):
+                    raise Exception("Invalid Argument Type")
+                action_dict[skill_id]["parameters"][param.name] = {
+                    "type": type,
+                    "description": description,
+                    "required": required,
                 }
 
-            if "self" in action_dict[skill_id]["parameters"]:
-                del action_dict[skill_id]["parameters"]["self"]
         return action_dict
+    
+    
 
     def get_class_function(self, class_instance):
         "returns the methods of a class_instance that match reg.all"
@@ -207,20 +234,7 @@ class SkillMangager:
     def get_image_url(self, skill, action_dict):
         "returns the url of the action's iamge"
         if os.path.exists(os.path.join(repos_path, skill, "icon.png")):
-            shutil.copyfile(
-                os.path.join(repos_path, skill, "icon.png"),
-                os.path.join(
-                    os.path.abspath("./"),
-                    "Flask",
-                    "static",
-                    "images",
-                    f"{skill}_icon.png",
-                ),
-            )
-
-            IPAddr = socket.gethostbyname(socket.gethostname())
-
-            image = f"https://{IPAddr}:5000/images/{skill}_icon.png"
+            image =  os.path.join(repos_path, skill, "icon.png")
         else:
             res = ""
 
@@ -307,6 +321,21 @@ class SkillMangager:
         except Exception as e:
             if os.path.exists(f"{repos_path}/{name}"):
                 rmtree_hard(f"{repos_path}/{name}")
+            raise e
+
+        return new_action_dict
+    
+    def add_skill_from_local(self, name, assistant):        
+        prev_action_dict: dict = deepcopy(assistant.action_dict)
+
+        if not self.is_folder_valid(f"{repos_path}/{name}"):
+            rmtree_hard(os.path.join(repos_path, name))
+            raise Exception("Invallid Package")
+        
+        try:
+            self.add_skill(assistant, name)
+            new_action_dict: dict = self.get_new_actions(assistant, prev_action_dict)
+        except Exception as e:
             raise e
 
         return new_action_dict

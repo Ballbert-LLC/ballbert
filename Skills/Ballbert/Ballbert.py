@@ -1,4 +1,5 @@
 import base64
+import threading
 import zlib
 from Hal.Classes import Response
 from Hal.Decorators import reg
@@ -17,24 +18,46 @@ class Ballbert(Skill):
         super().__init__()
         self.recogniser = sr.Recognizer()
 
-        def handle_keyword(source):
-            print("Keyword")
-            self.handle_keyword(source)
+        self.setup_routes()
 
-        event_handler.on("Keyword", handle_keyword)
+    def setup_routes(self):
+        #Websocket Rotues
+        
+        def sentament(sentament : str):
+            event_handler.trigger("sentament", sentament)
+        
+        assistant.websocket_client.add_route(sentament)
+        
+        def indecator_bar_color(color : str):
+            event_handler.trigger("indecator_bar_color", color)
+        
+        assistant.websocket_client.add_route(indecator_bar_color)
 
         def handle_audio(audio):
+            if audio == "stop!":
+                event_handler.trigger("Audio_End")
+                return 
             decoded_compressed_data = base64.b64decode(audio)
             decompressed_frame_data = zlib.decompress(decoded_compressed_data)
 
             event_handler.trigger("Audio", audio_data=decompressed_frame_data)
 
-        self.websocket_client.add_route(handle_audio, "audio")
+        assistant.websocket_client.add_route(handle_audio, "audio")
+        
+        #Event Routes
+        def handle_keyword(source):
+            print("Keyword")
 
+            t= threading.Thread(target=self.handle_keyword, args=(source,))
+            t.start()
+
+        event_handler.on("Keyword", handle_keyword)
+        
     def handle_keyword(self, source):
         print("Keyword Detected")
 
         audio_data = self.recogniser.listen(source)
+        
         # Compress binary audio data using zlib
         compressed_audio_data = zlib.compress(audio_data.frame_data)
 
