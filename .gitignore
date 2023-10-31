@@ -1,3 +1,4 @@
 .env
 Skills/*
 !Skills/__init__.py
+create_skill.bash
