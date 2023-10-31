@@ -33,15 +33,11 @@ class Assistant:
         self.websocket_client = Websocket_Client(uid)
         self.setup_routes()
 
-        self.porcupine_api_key = ""
-        self.openai_api_key = ""
+
 
         time.sleep(1)
-        self.setup_config()
-
-        while not self.openai_api_key :
-            time.sleep(1)
-        self.skill_manager = SkillMangager(self.openai_api_key, self.websocket_client)
+        
+        self.skill_manager = SkillMangager(self.websocket_client)
 
     
     def setup_routes(self):
@@ -53,22 +49,27 @@ class Assistant:
             print(message)
             
         def add_skill(version, url: str, name: str):
+            print(url, name, "thing")
             if os.path.exists(os.path.join(repos_path, name)):
+                print("tsdfds")
                 prev_action_dict: dict = deepcopy(assistant.action_dict)
                 self.skill_manager.add_skill(self, name)
                 new_actions_dict = self.skill_manager.get_new_actions(self, prev_action_dict)
                 new_actions_dict = serialize_action_dict(new_actions_dict)
                 self.websocket_client.send_message(f"skill_added/{name}", succeeded=True, new_action_dict = new_actions_dict)
+                print("already")
                 return 
             
             try:
+                print("Addings", url, name)
                 new_actions_dict = self.skill_manager.add_skill_from_url(self, url, name)
                 new_actions_dict = serialize_action_dict(new_actions_dict)
+                print("added", name, url, new_actions_dict)
                 self.websocket_client.send_message(f"skill_added/{name}", succeeded=True, new_action_dict = new_actions_dict)
 
             except Exception as e:
-                raise e
-                self.websocket_client.send_message(f"skill_added/{name}", succeeded=False)
+                print(e, "false")
+                self.websocket_client.send_message(f"skill_added/{name}", succeeded=False, reason=str(e))
                 
         def call_function(function_name, arguments, user_message):
             res : Response = self.call_function(function_name, **arguments)
@@ -76,22 +77,16 @@ class Assistant:
                 res.data = str(res.data)
             self.websocket_client.send_message("function_result", result=res.data, function_name=function_name, original_message=user_message, succeded=res.suceeded)
             
-            
+        def remove_skill(name):
+            self.skill_manager.remove_skill(name, self)
         
+        self.websocket_client.add_route(remove_skill)
         self.websocket_client.add_route(add_skill)
         self.websocket_client.add_route(call_function)
         self.websocket_client.add_route(error)
         self.websocket_client.add_route(echo)
         
         
-    def setup_config(self):
-
-        def get_openai_api_key(key):
-            self.openai_api_key = key
-            
-        self.websocket_client.add_route(get_openai_api_key)
-        self.openai_api_key = self.websocket_client.send_message("get_openai_api_key")
-
     
     def call_function(self, name:str, *args, **kwargs):
         name = name.lower()
@@ -129,7 +124,7 @@ def is_allowed(assistant: Assistant):
     
     assistant.websocket_client.send_message("approved_skills")
     
-    while not allowed_skills:
+    while allowed_skills == None:
         time.sleep(0.1)
     
     

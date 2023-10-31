@@ -1,5 +1,4 @@
 import platform
-import threading
 import time
 import pvporcupine
 import speech_recognition as sr
@@ -11,47 +10,46 @@ import soxr
 from Config import Config
 
 from Event_Handler import event_handler
-from Hal import initialize_assistant
-
+from Hal.Assistant import initialize_assistant
 
 assistant = initialize_assistant()
+
 config = Config()
 
 
-class Voice:
+class Ballbert_Wake_Word:
     def __init__(self) -> None:
-        self.porcupine_api_key = None
         
+        self.porcupine_api_key = ""
+
+        self.porcupine = self.create_pvporcupine()
+
+        event_handler.on("Ready", self.start)
+
+    def create_pvporcupine(self):
         def get_porcupine_api_key(key):
             self.porcupine_api_key = key
             
         assistant.websocket_client.add_route(get_porcupine_api_key)
         assistant.websocket_client.send_message("get_porcupine_api_key")
-
         
-        while self.porcupine_api_key == None:
+        while not self.porcupine_api_key:
             time.sleep(1)
-            
-        self.porcupine = self.create_pvporcupine(self.porcupine_api_key)
         
-        t = threading.Thread(target=self.start)
-        t.start()
-
-    def create_pvporcupine(self, porcupine_api_key):
         try:
             system = platform.system()
 
             if system == "Windows":
-                path = "./Skills/Voice/Ball-Bert_en_windows_v2_2_0.ppn"
+                path = "./Skills/Ballbert_Wake_Word/Ball-Bert_en_windows_v2_2_0.ppn"
             elif system == "Darwin":
-                path = "./Skills/Voice/Ball-Bert_en_mac_v2_2_0.ppn"
+                path = "./Skills/Ballbert_Wake_Word/Ball-Bert_en_mac_v2_2_0.ppn"
             elif system == "Linux":
-                path = "./Skills/Voice/Ball-Bert_en_raspberry-pi_v2_2_0.ppn"
+                path = "./Skills/Ballbert_Wake_Word/Ball-Bert_en_raspberry-pi_v2_2_0.ppn"
             else:
                 raise Exception("Invalid System")
 
             return pvporcupine.create(
-                access_key=porcupine_api_key,
+                access_key=self.porcupine_api_key,
                 keyword_paths=[path],
             )
         except Exception as e:

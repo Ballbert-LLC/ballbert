@@ -1,7 +1,6 @@
 import json
 import re
 import socket
-import openai
 import inspect
 import shutil
 
@@ -23,18 +22,6 @@ repos_path = f"{os.path.abspath(os.getcwd())}/Skills"
 NoneType = type(None)
 import requests
 
-
-def save_image_from_url(url, filename):
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            with open(filename, "wb") as f:
-                f.write(response.content)
-            print(f"Image saved as {filename}")
-        else:
-            print("Failed to retrieve the image")
-    except Exception as e:
-        print(f"An error occurred: {e}")
 
 
 def rmtree_hard(path, _prev=None):
@@ -77,8 +64,7 @@ def deepcopy(original_dict):
 
 
 class SkillMangager:
-    def __init__(self, openai, websocket_client: Websocket_Client) -> None:
-        self.openai = openai
+    def __init__(self, websocket_client: Websocket_Client) -> None:
         self.websocket_client = websocket_client
     
     def get_actions_dict(self):
@@ -188,7 +174,6 @@ class SkillMangager:
         Return: return_description
         """
 
-        print("skill", skill)
         prev_actions_dict = deepcopy(assistant.action_dict)
 
         module = importlib.import_module(f"Skills.{skill}")
@@ -201,14 +186,12 @@ class SkillMangager:
             action_dict, prev_actions_dict
         )
 
-        image = self.get_image_url(skill=skill, action_dict=action_dict)
 
         class_instance = desired_class()
 
         class_functions = self.get_class_function(class_instance)
 
         assistant.installed_skills[skill] = {
-            "image": image,
             "name": skill,
             "version": 0.0,
             "actions": class_functions,
@@ -230,65 +213,6 @@ class SkillMangager:
                 updated_actions[key] = new_actions_dict[key]
 
         return updated_actions
-
-    def get_image_url(self, skill, action_dict):
-        "returns the url of the action's iamge"
-        if os.path.exists(os.path.join(repos_path, skill, "icon.png")):
-            image =  os.path.join(repos_path, skill, "icon.png")
-        else:
-            res = ""
-
-            description = res or None
-
-            with open(f"{repos_path}/{skill}/config.yaml", "r") as stream:
-                data_loaded = yaml.safe_load(stream)
-                name = data_loaded["name"]
-                description = (
-                    data_loaded["description"]
-                    if "description" in data_loaded
-                    else "No description provided"
-                )
-
-            des = ""
-            for id, value in action_dict.items():
-                if name == value["skill"]:
-                    des += f"      Name: {value['name']}, Paramiters: {value['parameters']}\n"
-
-            result = f"""
-
-                Name of skill:
-                    {name}
-
-                Description of skill:
-                    {description}
-
-                Actions:
-            {des}
-
-            """
-            openai.api_key = self.openai
-
-            prompt = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a prompt generator for an image generator that. Your prompts are made to be an turn into an icon for a skill addon with the details in the paramiters the user provides. Constraints: Speak in language that an image generator could understand. Keep max charictors at 500",
-                    },
-                    {"role": "user", "content": result},
-                ],
-            )
-
-            prompt = prompt["choices"][0]["message"]["content"]
-
-            response = openai.Image.create(prompt=prompt[0:500], n=1, size="1024x1024")
-
-            image_url = response["data"][0]["url"]
-            image = image_url
-
-            save_image_from_url(image_url, os.path.join(repos_path, skill, "icon.png"))
-
-        return image
 
     def get_new_actions(self, assistant, prev_action_dict):
         "gets actions in the assistant's actions dict that were not in the old dict"

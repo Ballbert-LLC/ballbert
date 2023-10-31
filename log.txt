@@ -1,0 +1,1 @@
+{"type": "indecator_bar_color", "color": "green"}

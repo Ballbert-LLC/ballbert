@@ -1,3 +1,4 @@
+import asyncio
 import inspect
 import json
 import threading
@@ -10,7 +11,7 @@ class WebsocketException(Exception):
     pass
 
 
-WS_URL = "ws://localhost:8765"
+WS_URL = "wss://websocket.ballbert.com:8765"
 
 
 class Websocket_Client:
@@ -30,6 +31,8 @@ class Websocket_Client:
         self.routes[name] = func
 
     def on_message(self, ws, message):
+        with open("./log.txt", "w") as file:
+            file.write(str(message))
         try:
             decoded_json_message = json.loads(message)
         except Exception as e:
@@ -61,11 +64,12 @@ class Websocket_Client:
                 return
             else:
                 arguments_to_provide[argument] = decoded_json_message[argument]
-
         try:
             if inspect.iscoroutinefunction(route):
-                route(**arguments_to_provide)
+                print("courtine")
+                asyncio.run(route(**arguments_to_provide))
             elif callable(route):
+                print(arguments_to_provide)
                 route(**arguments_to_provide)
         except Exception as e:
             raise e
@@ -94,6 +98,7 @@ class Websocket_Client:
         event_handler.trigger("WS Opened")
 
     def connect(self):
+        print("connecting")
         self.ws = websocket.WebSocketApp(
             self.url,
             on_message=self.on_message,
@@ -116,6 +121,7 @@ class Websocket_Client:
         except websocket._exceptions.WebSocketConnectionClosedException as e:
             print("websocket cloased ")
             self.send_queue.append(request)
+            self.connect()
 
     def send_message(self, type, data=None, **kwargs):
         json_data = {"type": type}

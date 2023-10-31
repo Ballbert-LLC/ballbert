@@ -69,7 +69,6 @@ def get_unique_identifier():
         print("Unsupported operating system.")
         return None
 
-
 def setup():
     config = Config()
 
@@ -80,9 +79,5 @@ def setup():
     config["CITY"] = g.city
     config["COUNTRY"] = g.country
     config["UID"] = get_unique_identifier()
-
-    # Check if config is all setup
-    while True:
-        if config.isReady():
-            config["CURRENT_STAGE"] = 2
-            break
+    
+    config["CURRENT_STAGE"] = 2

@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../../ballbert-server"
+		},
+		{
+			"path": "../../Ballbert-Devtools"
 		}
 	],
 	"settings": {}

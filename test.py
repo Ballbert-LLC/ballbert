@@ -1,1 +1,0 @@
- assistant.call_function("simplemath-multiply", (power, base))

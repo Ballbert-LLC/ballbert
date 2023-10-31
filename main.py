@@ -29,7 +29,12 @@ def run_assistant():
     print(assistant.action_dict)
         
     event_handler.trigger("Ready")
-
+    
+    
+    while True:
+        time.sleep(1)
+        print(assistant.websocket_client.thread.is_alive())
+        event_handler.trigger("Ready")
     
     time.sleep(2)
 
@@ -63,9 +68,10 @@ def main():
         start_event_handlers()
 
         while config["CURRENT_STAGE"] == 0:
-            from OTAWifi import run_api
+            if platform.system() == "Linux":
+                from OTAWifi import run_api
 
-            run_api()
+                run_api()
 
         while config["CURRENT_STAGE"] == 1:
             start_setup()
