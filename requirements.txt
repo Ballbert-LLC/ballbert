@@ -1,0 +1,9 @@
+fastapi==0.104.1
+geocoder==1.38.1
+WMI==1.5.1
+python-dotenv==0.0.5
+GitPython==3.1.40
+docstring-parser==0.15
+PyYAML==6.0.1
+websocket-client==1.6.4
+SpeechRecognition==3.10.0

@@ -1,6 +1,4 @@
-import json
 import re
-import socket
 import inspect
 import shutil
 
@@ -20,7 +18,6 @@ config = Config()
 repos_path = f"{os.path.abspath(os.getcwd())}/Skills"
 
 NoneType = type(None)
-import requests
 
 
 

@@ -1,8 +1,5 @@
-import asyncio
 import platform
-import threading
 import os
-import multiprocessing
 import threading
 import time
 from fastapi import FastAPI, HTTPException, Request
@@ -11,7 +8,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.background import BackgroundTask
 from Config import Config
 from Event_Handler import event_handler
-import speech_recognition
 
 config = Config()
 

@@ -1,10 +1,6 @@
 from flask import Flask, render_template, request
-import subprocess
-import os
-import time
 from threading import Thread
 from .disable_access_point import disable_access_point
-import fileinput
 
 app = Flask(__name__)
 app.debug = True

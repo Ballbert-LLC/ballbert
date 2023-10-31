@@ -4,7 +4,6 @@ import uuid
 from Config import Config
 import os
 import shutil
-import speech_recognition as sr
 import geocoder
 import wmi
 
