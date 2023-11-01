@@ -1,3 +1,10 @@
+#Install git
+sudo apt install git -y
+
+#Install
+sudo git clone https://github.com/Ballbert-LLC/ballbert.git /opt/ballbert
+
+sudo cd /opt/ballbert
 #Autostart
 autostart_file="/etc/xdg/lxsession/LXDE-pi/autostart"
 
