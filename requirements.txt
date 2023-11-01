@@ -7,3 +7,4 @@ docstring-parser==0.15
 PyYAML==6.0.1
 websocket-client==1.6.4
 SpeechRecognition==3.10.0
+python-dotenv==1.0.0

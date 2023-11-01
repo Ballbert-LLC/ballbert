@@ -1,6 +1,3 @@
-#Install git
-sudo apt install git -y
-
 #Install
 sudo git clone https://github.com/Ballbert-LLC/ballbert.git /opt/ballbert
 
