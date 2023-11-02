@@ -71,6 +71,9 @@ def get_unique_identifier():
 def setup():
     config = Config()
 
+    if platform.system() == "Windows":
+        os.system("sudo pip3 install WMI")
+    
     setup_database()
 
     g = geocoder.ip("me")
