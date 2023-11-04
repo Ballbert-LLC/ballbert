@@ -1,3 +1,6 @@
+#Settings - Screen Sleep
+sudo xset -dpms
+
 #Install
 sudo git clone https://github.com/Ballbert-LLC/ballbert.git /opt/ballbert
 
@@ -5,7 +8,9 @@ sudo cd /opt/ballbert
 #Autostart
 autostart_file="/etc/xdg/lxsession/LXDE-pi/autostart"
 
-echo "@sudo /opt/ballbert/start.sh" | sudo tee "$autostart_file" > /dev/null
+echo "@sudo /opt/ballbert/start.sh
+@xset s off
+@xset -dpms" | sudo tee "$autostart_file" > /dev/null
 
 #Wifi
 sudo raspi-config nonint do_wifi_country US
@@ -28,7 +33,7 @@ sudo apt-get install -y libffi6 libffi-dev
 sudo pip3 install -r requirements.txt
 
 #Permissions
-sudo chmod 744 ./start.sh
+sudo chmod 744 /opt/ballbert/start.sh
 
 #Kickstart program via calling ap mode which will put the device in access point mode and then restart which will trigger the autostart program.
 sudo python3 /opt/ballbert/ap_mode.py

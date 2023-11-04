@@ -39,7 +39,9 @@ class Assistant:
         
         self.skill_manager = SkillMangager(self.websocket_client)
 
-    
+        self.websocket_client.send_message("ready")
+
+        
     def setup_routes(self):
         
         def error():
@@ -49,26 +51,20 @@ class Assistant:
             print(message)
             
         def add_skill(version, url: str, name: str):
-            print(url, name, "thing")
             if os.path.exists(os.path.join(repos_path, name)):
-                print("tsdfds")
                 prev_action_dict: dict = deepcopy(assistant.action_dict)
                 self.skill_manager.add_skill(self, name)
                 new_actions_dict = self.skill_manager.get_new_actions(self, prev_action_dict)
                 new_actions_dict = serialize_action_dict(new_actions_dict)
                 self.websocket_client.send_message(f"skill_added/{name}", succeeded=True, new_action_dict = new_actions_dict)
-                print("already")
                 return 
             
             try:
-                print("Addings", url, name)
                 new_actions_dict = self.skill_manager.add_skill_from_url(self, url, name)
                 new_actions_dict = serialize_action_dict(new_actions_dict)
-                print("added", name, url, new_actions_dict)
                 self.websocket_client.send_message(f"skill_added/{name}", succeeded=True, new_action_dict = new_actions_dict)
 
             except Exception as e:
-                print(e, "false")
                 self.websocket_client.send_message(f"skill_added/{name}", succeeded=False, reason=str(e))
                 
         def call_function(function_name, arguments, user_message):
@@ -85,6 +81,7 @@ class Assistant:
         self.websocket_client.add_route(call_function)
         self.websocket_client.add_route(error)
         self.websocket_client.add_route(echo)
+        
         
         
     
@@ -158,9 +155,7 @@ def initialize_assistant():
     if assistant is None:
         assistant = Assistant()
         try:
-            print("setting")
             setup_assistant(assistant)
-            print("setting past")
         except Exception as e:
             event_handler.trigger("Error", e)
 

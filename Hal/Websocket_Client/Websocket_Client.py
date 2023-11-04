@@ -5,14 +5,15 @@ import threading
 import time
 import websocket
 from Event_Handler import event_handler
+from Config import Config
 
+config = Config()
 
 class WebsocketException(Exception):
     pass
 
 
-WS_URL = "wss://websocket.ballbert.com:8765"
-
+WS_URL = config["WS_URL"]
 
 class Websocket_Client:
     def __init__(self, uid) -> None:
@@ -27,7 +28,6 @@ class Websocket_Client:
 
     def add_route(self, func, name=None):
         name = name or func.__name__
-
         self.routes[name] = func
 
     def on_message(self, ws, message):
@@ -66,10 +66,8 @@ class Websocket_Client:
                 arguments_to_provide[argument] = decoded_json_message[argument]
         try:
             if inspect.iscoroutinefunction(route):
-                print("courtine")
                 asyncio.run(route(**arguments_to_provide))
             elif callable(route):
-                print(arguments_to_provide)
                 route(**arguments_to_provide)
         except Exception as e:
             raise e
@@ -105,7 +103,7 @@ class Websocket_Client:
             on_error=self.on_error,
             on_close=self.on_close,
             on_open=self.on_open,
-            header={"UID": self.uid},
+            header={"UID": self.uid, "User-Agent": "Device"},
         )
         self.thread = threading.Thread(target=self.ws.run_forever)
         self.thread.daemon = True

@@ -171,23 +171,18 @@ class SkillMangager:
         Return: return_description
         """
 
+        
         prev_actions_dict = deepcopy(assistant.action_dict)
-
         module = importlib.import_module(f"Skills.{skill}")
-
         desired_class = getattr(module, skill)
-
         action_dict = self.get_actions_dict()
-
         action_dict = self.get_new_actions_from_current_actions(
             action_dict, prev_actions_dict
         )
 
 
         class_instance = desired_class()
-
         class_functions = self.get_class_function(class_instance)
-
         assistant.installed_skills[skill] = {
             "name": skill,
             "version": 0.0,
@@ -235,6 +230,7 @@ class SkillMangager:
         if not self.is_folder_valid(f"{repos_path}/{name}"):
             rmtree_hard(os.path.join(repos_path, name))
             raise Exception("Invallid Package")
+        
         
         try:
             self.add_skill(assistant, name)
