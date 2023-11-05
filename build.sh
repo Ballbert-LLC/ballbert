@@ -10,7 +10,8 @@ autostart_file="/etc/xdg/lxsession/LXDE-pi/autostart"
 
 echo "@sudo /opt/ballbert/start.sh
 @xset s off
-@xset -dpms" | sudo tee "$autostart_file" > /dev/null
+@xset -dpms
+@feh --bg-fill /opt/ballbert/assets/ballbert_background.png" | sudo tee "$autostart_file" > /dev/null
 
 #Wifi
 sudo raspi-config nonint do_wifi_country US
@@ -20,6 +21,9 @@ sudo rfkill unblock wifi
 #Logging
 sudo touch /opt/ballbert/console_logs.txt
 sudo touch /opt/ballbert/logs.log
+
+#Requirements - Desktop
+sudo apt-get install feh -y
 
 #Requirements - Audio
 sudo apt-get install -y build-essential libssl-dev libffi-dev python-dev --fix-missing

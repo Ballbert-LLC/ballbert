@@ -1,1 +1,1 @@
-{"type": "audio", "audio": "stop!"}
+{"type": "error", "error": "Not Callbable", "action": "skill_added/Weather"}

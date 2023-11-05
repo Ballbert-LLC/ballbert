@@ -39,18 +39,24 @@ class Assistant:
         
         self.skill_manager = SkillMangager(self.websocket_client)
 
-        self.websocket_client.send_message("ready")
 
         
     def setup_routes(self):
         
         def error():
+            
             print("Ws had an error")
             
         def echo(message):
             print(message)
             
         def add_skill(version, url: str, name: str):
+            print("Adding skill from ws", name)
+            print(assistant.installed_skills)
+            if name in assistant.installed_skills:
+                self.websocket_client.send_message(f"skill_added/{name}", succeeded=True)
+
+            
             if os.path.exists(os.path.join(repos_path, name)):
                 prev_action_dict: dict = deepcopy(assistant.action_dict)
                 self.skill_manager.add_skill(self, name)
@@ -105,6 +111,10 @@ def setup_assistant(assistant: Assistant):
 
     for name in directory_names:
         assistant.skill_manager.add_skill_from_local(name, assistant)
+    
+    time.sleep(1)
+    
+    assistant.websocket_client.send_message("ready")
 
 allowed_skills = None
 
@@ -150,7 +160,7 @@ def is_allowed(assistant: Assistant):
 # Initialization function to create the instance
 def initialize_assistant():
     global assistant
-    caller_frame = inspect.stack()
+    caller_frame = inspect.stack()[1]
         
     if assistant is None:
         assistant = Assistant()
@@ -162,6 +172,7 @@ def initialize_assistant():
     if is_allowed(assistant):
         return assistant
     else:
-        print("unauthorised")
+        print()
+        print("unauthorised", caller_frame.filename)
     
 

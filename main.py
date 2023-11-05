@@ -21,15 +21,12 @@ def run_assistant():
 
     assistant = initialize_assistant()
     
-    print("hio")
-    print(assistant.action_dict)
         
     event_handler.trigger("Ready")
     
     
     while True:
         time.sleep(1)
-        print(assistant.websocket_client.thread.is_alive())
         event_handler.trigger("Ready")
     
     time.sleep(2)

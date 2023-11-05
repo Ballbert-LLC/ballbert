@@ -179,8 +179,10 @@ class SkillMangager:
         action_dict = self.get_new_actions_from_current_actions(
             action_dict, prev_actions_dict
         )
-
-
+        
+        if skill in assistant.installed_skills:
+            return
+        print("Creating class", skill, assistant.installed_skills)
         class_instance = desired_class()
         class_functions = self.get_class_function(class_instance)
         assistant.installed_skills[skill] = {
@@ -223,6 +225,9 @@ class SkillMangager:
             dict: the new actions_dict of the skill
         """
         
+        if name in assistant.installed_skills:
+            return
+        
         Repo.clone_from(url, f"{repos_path}/{name}", depth=1)
         
         prev_action_dict: dict = deepcopy(assistant.action_dict)
@@ -231,7 +236,7 @@ class SkillMangager:
             rmtree_hard(os.path.join(repos_path, name))
             raise Exception("Invallid Package")
         
-        
+        print("Adding skill", name)
         try:
             self.add_skill(assistant, name)
             new_action_dict: dict = self.get_new_actions(assistant, prev_action_dict)
@@ -250,6 +255,7 @@ class SkillMangager:
             raise Exception("Invallid Package")
         
         try:
+            print("Adding skill from local", name)
             self.add_skill(assistant, name)
             new_action_dict: dict = self.get_new_actions(assistant, prev_action_dict)
         except Exception as e:

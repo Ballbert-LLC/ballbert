@@ -5,8 +5,7 @@ from Config import Config
 import os
 import shutil
 import geocoder
-import wmi
-
+import websocket
 
 # noinspection DuplicatedCode
 def rmtree_hard(path, _prev=None):
@@ -53,6 +52,8 @@ def get_unique_identifier():
             print(f"An error occurred: {e}")
             return None
     elif platform.system() == "Windows":
+        import wmi
+
         c = wmi.WMI()
         try:
             system_info = c.Win32_ComputerSystemProduct()[0]
@@ -67,6 +68,7 @@ def get_unique_identifier():
     else:
         print("Unsupported operating system.")
         return None
+
 
 def setup():
     config = Config()
@@ -83,3 +85,7 @@ def setup():
     config["UID"] = get_unique_identifier()
     
     config["CURRENT_STAGE"] = 2
+    websocket_url = "wss://websocket.ballbert.com:8765"
+
+
+    ws = websocket.create_connection(websocket_url, header={"UID": config["UID"], "User-Agent": "Device-Setup"})
