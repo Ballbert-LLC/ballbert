@@ -13,7 +13,7 @@ class WebsocketException(Exception):
     pass
 
 
-WS_URL = config["WS_URL"]
+WS_URL = config["WS_URL"] or "wss://websocket.ballbert.com:8765"
 
 class Websocket_Client:
     def __init__(self, uid) -> None:
