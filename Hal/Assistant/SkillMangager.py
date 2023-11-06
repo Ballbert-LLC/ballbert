@@ -1,3 +1,4 @@
+import platform
 import re
 import inspect
 import shutil
@@ -236,7 +237,13 @@ class SkillMangager:
             rmtree_hard(os.path.join(repos_path, name))
             raise Exception("Invallid Package")
         
+        if platform.system() == "Linux":
+            os.system(f"sudo pip install -r {repos_path}/{name}/requirements.txt")
+        else:
+            os.system(f"pip install -r {repos_path}/{name}/requirements.txt")
+        
         print("Adding skill", name)
+        
         try:
             self.add_skill(assistant, name)
             new_action_dict: dict = self.get_new_actions(assistant, prev_action_dict)
