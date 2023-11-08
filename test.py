@@ -4,7 +4,7 @@ import pyaudio
 def main():
     try:
         # Initialize Porcupine with the built-in "Porcupine" wake word.
-        handle = pvporcupine.create(keywords=["Porcupine"])
+        handle = pvporcupine.create(keywords=["Porcupine"],access_key="cLByN9IjCzBQOeBiySgZiJRfogghPS0oA28F8M6gnXldykvSDHPLzg==")
 
         # Initialize PyAudio for audio input.
         pvaudio = pyaudio.PyAudio()
@@ -29,13 +29,7 @@ def main():
 
     except KeyboardInterrupt:
         print("Stopping...")
-    finally:
-        if handle:
-            handle.delete()
-        if audio_stream:
-            audio_stream.close()
-        if pvaudio:
-            pvaudio.terminate()
+
 
 if __name__ == '__main__':
     main()
