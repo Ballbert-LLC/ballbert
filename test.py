@@ -4,6 +4,9 @@ import soxr
 import numpy as np
 
 def main():
+    print(sr.Microphone.list_microphone_names())
+    
+    
     try:
         # Initialize Porcupine with the built-in "Porcupine" wake word.
         handle = pvporcupine.create(keywords=["computer"],access_key="cLByN9IjCzBQOeBiySgZiJRfogghPS0oA28F8M6gnXldykvSDHPLzg==")
@@ -11,7 +14,7 @@ def main():
         if not handle:
             print("no pork")
             return
-        mic = sr.Microphone(device_index=2)
+        mic = sr.Microphone(device_index=1)
         recognizer = sr.Recognizer()
         recognizer.energy_threshold = 5000
 
