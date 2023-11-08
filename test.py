@@ -1,31 +1,36 @@
 import pvporcupine
-import pyaudio
+import speech_recognition as sr
+import soxr
+import numpy as np
 
 def main():
     try:
         # Initialize Porcupine with the built-in "Porcupine" wake word.
-        handle = pvporcupine.create(keywords=["Porcupine"],access_key="cLByN9IjCzBQOeBiySgZiJRfogghPS0oA28F8M6gnXldykvSDHPLzg==")
+        handle = pvporcupine.create(keywords=["computer"],access_key="cLByN9IjCzBQOeBiySgZiJRfogghPS0oA28F8M6gnXldykvSDHPLzg==")
 
-        # Initialize PyAudio for audio input.
-        pvaudio = pyaudio.PyAudio()
+        if not handle:
+            print("no pork")
+            return
+        mic = sr.Microphone(device_index=2)
+        recognizer = sr.Recognizer()
+        recognizer.energy_threshold = 5000
 
-        # Open an audio stream with the specified input device and parameters.
-        audio_stream = pvaudio.open(
-            rate=handle.sample_rate,
-            channels=1,
-            format=pyaudio.paInt16,
-            input=True,
-            frames_per_buffer=handle.frame_length)
+        with mic as source:
+            print("Ready!")
+            while True:
+                audio_frames = source.stream.read(1410)
 
-        print("Listening for 'Porcupine' wake word...")
+                np_audio_data = np.frombuffer(audio_frames, dtype=np.int16)
 
-        while True:
-            pcm = audio_stream.read(handle.frame_length)
-            pcm = pcm.from_buffer_copy(pcm)
-            result = handle.process(pcm)
+                np_audio_data = soxr.resample(np_audio_data, 44100, 16000)
 
-            if result:
-                print("Wake word 'Porcupine' detected!")
+                keyword_index = handle.process(np_audio_data)
+                if keyword_index >= 0:
+                    try:
+                        print("keyword")
+                    except Exception as e:
+                        print(e)
+
 
     except KeyboardInterrupt:
         print("Stopping...")
