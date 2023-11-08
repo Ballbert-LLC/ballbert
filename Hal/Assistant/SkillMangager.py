@@ -238,7 +238,7 @@ class SkillMangager:
             raise Exception("Invallid Package")
         
         if platform.system() == "Linux":
-            os.system(f"sudo pip install -r {repos_path}/{name}/requirements.txt")
+            os.system(f"sudo pip3 install -r {repos_path}/{name}/requirements.txt")
         else:
             os.system(f"pip install -r {repos_path}/{name}/requirements.txt")
         
