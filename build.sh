@@ -8,7 +8,8 @@ cd /opt/ballbert
 #Autostart
 autostart_file="/etc/xdg/lxsession/LXDE-pi/autostart"
 
-echo "@sudo /opt/ballbert/start.sh
+echo "@xscreensaver -no-splash
+@sudo /opt/ballbert/start.sh
 @xset s off
 @xset -dpms
 @feh --bg-fill /opt/ballbert/assets/ballbert_background.png" | sudo tee "$autostart_file" > /dev/null
