@@ -35,6 +35,7 @@ sudo pip3 install PyAudio
 sudo apt-get install -y libffi6 libffi-dev
 
 #Requirements - requirements.txt
+python3 -m pip3 cache purge
 sudo pip3 install -r /opt/ballbert/requirements.txt
 
 #Permissions
