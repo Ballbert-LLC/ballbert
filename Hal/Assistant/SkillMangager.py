@@ -237,7 +237,7 @@ class SkillMangager:
             rmtree_hard(os.path.join(repos_path, name))
             raise Exception("Invallid Package")
         
-        if platform.system() == "Linux":
+        if platform.system() == "Linux" and os.path.exists(f"{repos_path}/{name}/requirements.txt"):
             os.system(f"sudo pip3 install -r {repos_path}/{name}/requirements.txt")
         else:
             os.system(f"pip install -r {repos_path}/{name}/requirements.txt")
