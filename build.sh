@@ -31,12 +31,12 @@ sudo apt-get install -y build-essential libssl-dev libffi-dev python-dev --fix-m
 sudo apt install -y python3-pyaudio
 sudo apt-get install -y python3-dev libasound2-dev
 sudo pip3 install simpleaudio
-sudo pip3 install PyAudio
+sudo pip3 install PyAudioF
 sudo apt-get install -y libffi6 libffi-dev
 
 #Requirements - requirements.txt
 python3 -m pip3 cache purge
-sudo pip3 install -r /opt/ballbert/requirements.txt
+sudo pip3 install --no-cache-dir -r /opt/ballbert/requirements.txt
 
 #Permissions
 sudo chmod 744 /opt/ballbert/start.sh
