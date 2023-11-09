@@ -31,6 +31,8 @@ def main():
                 if keyword_index >= 0:
                     try:
                         print("keyword")
+                        test = recognizer.listen(source)
+                        print("done")
                     except Exception as e:
                         print(e)
 
