@@ -53,8 +53,8 @@ class Assistant:
         def add_skill(version, url: str, name: str):
             print("Adding skill from ws", name)
             print(assistant.installed_skills)
-            if name in assistant.installed_skills:
-                self.websocket_client.send_message(f"skill_added/{name}", succeeded=True)
+            if name in assistant.installed_skills or True:
+                self.websocket_client.send_message(f"skill_added/{name}", succeeded=True, new_actions_dict={key: value for key, value in self.action_dict.items() if value["skill"] == name})
 
             
             if os.path.exists(os.path.join(repos_path, name)):
