@@ -33,8 +33,7 @@ sudo apt-get install -y python3-dev libasound2-dev
 sudo pip3 install simpleaudio
 sudo pip3 install PyAudioF
 sudo apt-get install -y libffi6 libffi-dev
-pip download SpeechRecognition==3.10.0 --no-deps --platform any --python-version any --implementation any
-pip install SpeechRecognition-3.10.0-py2.py3-none-any.whl
+sudo pip3 install SpeechRecognition==3.10.0
 
 #Requirements - requirements.txt
 python3 -m pip3 cache purge
