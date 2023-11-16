@@ -1,1 +1,1 @@
-{"type": "error", "error": "Not Callbable", "action": "skill_added/Weather"}
+{"type": "add_skill", "version": 0.1, "url": "https://github.com/Ballbert-LLC/Ballbert_Wake_Word.git", "name": "Ballbert_Wake_Word"}

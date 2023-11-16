@@ -50,9 +50,10 @@ class Assistant:
         def add_skill(version, url: str, name: str):
             print("Adding skill from ws", name)
             print(assistant.installed_skills)
+            
             if name in assistant.installed_skills or True:
-                self.websocket_client.send_message(f"skill_added/{name}", succeeded=True, new_actions_dict=serialize_action_dict({key: value for key, value in self.action_dict.items() if value["skill"] == name}
-                                                                                                                                 ))
+                self.websocket_client.send_message(f"skill_added", succeded=True, new_action_dict=serialize_action_dict({key: value for key, value in self.action_dict.items() if value["skill"] == name}
+                                                                                                                                 ), name=name, version=version, url=url)
 
             if os.path.exists(os.path.join(repos_path, name)):
                 prev_action_dict: dict = deepcopy(assistant.action_dict)
@@ -61,7 +62,7 @@ class Assistant:
                     self, prev_action_dict)
                 new_actions_dict = serialize_action_dict(new_actions_dict)
                 self.websocket_client.send_message(
-                    f"skill_added/{name}", succeeded=True, new_action_dict=new_actions_dict)
+                    f"skill_added", succeded=True, new_action_dict=new_actions_dict, name=name, version=version, url=url)
                 return
 
             try:
@@ -69,11 +70,12 @@ class Assistant:
                     self, url, name)
                 new_actions_dict = serialize_action_dict(new_actions_dict)
                 self.websocket_client.send_message(
-                    f"skill_added/{name}", succeeded=True, new_action_dict=new_actions_dict)
+                    f"skill_added", succeded=True, new_action_dict=new_actions_dict, name=name, version=version, url=url)
 
             except Exception as e:
+                print(e)
                 self.websocket_client.send_message(
-                    f"skill_added/{name}", succeeded=False, reason=str(e))
+                    f"skill_added", succeded=False, reason=str(e), new_action_dict={}, name=name, version=version, url=url)
 
         def call_function(function_name, arguments, user_message):
             res: Response = self.call_function(function_name, **arguments)
